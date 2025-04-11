@@ -16,4 +16,6 @@ void init_uart_pin(uart_inst_t *uart, uint tx_pin, uint rx_pin)
 
     gpio_set_function(tx_pin, GPIO_FUNC_UART);
     gpio_set_function(rx_pin, GPIO_FUNC_UART);
+
+    gpio_pull_up(rx_pin);
 }
