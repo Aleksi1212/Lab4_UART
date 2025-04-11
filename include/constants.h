@@ -8,4 +8,6 @@
 
 #define BAUD_RATE 9600
 
+#define MAX_RESPONSE_SIZE 255
+
 #endif
