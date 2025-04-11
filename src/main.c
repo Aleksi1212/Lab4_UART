@@ -4,6 +4,7 @@
 
 #include "constants.h"
 #include "pin_config.h"
+#include "uart.h"
 
 int main(void) {
     stdio_init_all();
@@ -11,43 +12,44 @@ int main(void) {
     init_input_pin(SW_0);
     init_uart_pin(uart1, UART_TX_PIN, UART_RX_PIN);
 
-    bool pressed = false;
-    bool send = true;
+    int state = 1;
 
-    const uint8_t message[] = "AT\n";
-    char str[255];
-    int pos = 0;
+    bool pressed = false;
+    bool write = true;
+
+    const uint8_t AT_message[] = "AT\n";
+    const uint8_t VER_message[] = "AT+VER\n";
+    const uint8_t DevEui_message[] = "AT+ID=DevEui\n";
 
     while (true)
     {
-        if (pressed && gpio_get(SW_0) == 0) {
-            pressed = false;
-        }
-        else if (!pressed && gpio_get(SW_0) > 0) {
-            send = !send;
-            pressed = true;
-            sleep_ms(10);
-        }
-
-        if (send) {
-            printf("Sending...\n");
-            uart_write_blocking(uart1, message, strlen(message));
-            printf("Sent.\n");
-
-            send = false;
-        }
-        while (uart_is_readable(uart1)) {
-            char chr = uart_getc(uart1);
-            if (chr == '\r' || chr == '\n') {
-                str[pos] = '\0';
-                printf("Recieved: %s\n", str);
-                pos = 0;
+        switch (state)
+        {
+        case 1:
+            if (pressed && gpio_get(SW_0) == 0) {
+                pressed = false;
             }
-            else {
-                if (pos < 254) {
-                    str[pos++] = chr;
-                }
+            else if (!pressed && gpio_get(SW_0) > 0) {
+                write = !write;
+                pressed = true;
+                sleep_ms(10);
             }
+
+            if (write) {
+                write = !write_uart(uart1, AT_message, &state);
+            }
+            break;
+        
+        case 2:
+            read_uart(uart1, &state);
+            break;
+        case 3:
+            // Test
+            printf("State 3\n");
+            state = 1;
+            break;
+        default:
+            break;
         }
     }
     
