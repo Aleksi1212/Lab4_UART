@@ -34,6 +34,7 @@ add_executable(${PROJECT_NAME}
     src/main.c
     src/pin_config.c
     src/uart.c
+    src/str_utils.c
     # additional source files
 )
 
