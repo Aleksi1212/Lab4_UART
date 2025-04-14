@@ -50,17 +50,18 @@ void read_at_command(uart_inst_t *uart, int *step)
             *step = 3;
             break;
         }
-
+            
         bool readable = uart_is_readable_within_us(uart, READ_UART_TIME_OUT_MS * 1000);
-        if (!readable) {
-            attempts++;
-            continue;
-        }
-
+        printf("%d\n", readable);
         while (readable) {
             ok = read_uart_char(str, "+AT: OK", &pos, &attempts);
             if (ok) break;
+
+            readable = uart_is_readable_within_us(uart, READ_UART_TIME_OUT_MS * 1000);
         }
+
+        if (!readable)
+            attempts++;
     }
 
     if (attempts == 5) {
@@ -75,12 +76,6 @@ void read_ver_command(uart_inst_t *uart, int *step)
     int pos = 0;
 
     bool readable = uart_is_readable_within_us(uart, READ_UART_TIME_OUT_MS * 1000);
-    if (!readable) {
-        printf("Module stopped responding\n");
-        *step = 1;
-        return;
-    }
-
     while (readable) {
         if (read_uart_char(str, "+VER:", &pos, NULL)) {
             char *splitted_ver[2];
@@ -91,12 +86,21 @@ void read_ver_command(uart_inst_t *uart, int *step)
                 printf("Firmware version: %s\n", splitted_ver[1]);
             } else {
                 fprintf(stderr, "ERROR: Invalid firmware version format (%s)\n", str);
+                *step = 1;
+                return;
             }
             break;
         }
+
+        readable = uart_is_readable_within_us(uart, READ_UART_TIME_OUT_MS * 1000);
     }
-    
-    *step = 4;
+
+    if (readable) {
+        *step = 4;
+    } else {
+        printf("Module stopped responding\n");
+        *step = 1;
+    }
 }
 
 void read_deveui_command(uart_inst_t *uart, int *step)
@@ -105,12 +109,6 @@ void read_deveui_command(uart_inst_t *uart, int *step)
     int pos = 0;
 
     bool readable = uart_is_readable_within_us(uart, READ_UART_TIME_OUT_MS * 1000);
-    if (!readable) {
-        printf("Module stopped responding\n");
-        *step = 1;
-        return;
-    }
-
     while (readable) {
         if (read_uart_char(str, "+ID: DevEui,", &pos, NULL)) {
             char *splitted_deveui[2];
@@ -124,10 +122,19 @@ void read_deveui_command(uart_inst_t *uart, int *step)
                 printf("DevEui: %s\n", splitted_deveui[1]);
             } else {
                 fprintf(stderr, "ERROR: Invalid DevEui format (%s)\n", str);
+                *step = 1;
+                return;
             }
             break;
         }
+
+        readable = uart_is_readable_within_us(uart, READ_UART_TIME_OUT_MS * 1000);
     }
     
-    *step = 5;
+    if (readable) {
+        *step = 5;
+    } else {
+        printf("Module stopped responding\n");
+        *step = 1;
+    }
 }
