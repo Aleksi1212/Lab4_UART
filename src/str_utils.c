@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 
 #include "str_utils.h"
@@ -36,5 +37,11 @@ void lower_case(char *str)
     for (int i = 0; str[i]; i++) {
         str[i] = tolower(str[i]);
     }
+}
+
+void clear_terminal()
+{
+    printf("\033[2J\033[H");
+    fflush(stdout);
 }
 

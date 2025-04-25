@@ -5,9 +5,12 @@
 #include "constants.h"
 #include "pin_config.h"
 #include "uart.h"
+#include "str_utils.h"
 
 int main(void) {
     stdio_init_all();
+
+    clear_terminal();
 
     init_input_pin(SW_0);
     init_uart_pin(uart1, UART_TX_PIN, UART_RX_PIN);
