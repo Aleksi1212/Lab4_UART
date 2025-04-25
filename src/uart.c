@@ -52,7 +52,6 @@ void read_at_command(uart_inst_t *uart, int *step)
         }
             
         bool readable = uart_is_readable_within_us(uart, READ_UART_TIME_OUT_MS * 1000);
-        printf("%d\n", readable);
         while (readable) {
             ok = read_uart_char(str, "+AT: OK", &pos, &attempts);
             if (ok) break;
